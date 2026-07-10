@@ -1,0 +1,9 @@
+# Never upload these to Vercel.
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+*.pyc
+.claude/
+run.out

@@ -1,0 +1,8 @@
+{
+  "functions": {
+    "api/summarize.py": {
+      "includeFiles": "app.py",
+      "maxDuration": 60
+    }
+  }
+}

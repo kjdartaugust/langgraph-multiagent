@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LangGraph: Researcher → Writer</title>
+  <style>
+    :root { color-scheme: light dark; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; font-family: system-ui, -apple-system, sans-serif;
+      background: #0f1115; color: #e7e9ee; display: flex; justify-content: center;
+      padding: 24px;
+    }
+    main { width: 100%; max-width: 640px; }
+    h1 { font-size: 1.3rem; margin: 0 0 4px; }
+    p.sub { margin: 0 0 20px; color: #9aa0ac; font-size: .9rem; }
+    .row { display: flex; gap: 8px; }
+    input {
+      flex: 1; padding: 12px 14px; border-radius: 10px; border: 1px solid #2a2f3a;
+      background: #171a21; color: inherit; font-size: 1rem;
+    }
+    button {
+      padding: 12px 18px; border: 0; border-radius: 10px; font-size: 1rem;
+      font-weight: 600; background: #6b8afd; color: #0b0d12; cursor: pointer;
+    }
+    button:disabled { opacity: .5; cursor: default; }
+    .card {
+      margin-top: 20px; padding: 16px 18px; border-radius: 12px;
+      background: #171a21; border: 1px solid #2a2f3a; white-space: pre-wrap;
+      line-height: 1.55; display: none;
+    }
+    .card.show { display: block; }
+    .label { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em;
+      color: #9aa0ac; margin-bottom: 6px; }
+    .err { color: #ff8f8f; }
+    details { margin-top: 12px; }
+    summary { cursor: pointer; color: #9aa0ac; font-size: .85rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Researcher → Writer</h1>
+    <p class="sub">A two-agent LangGraph flow. Enter a topic; the researcher gathers notes, the writer summarizes.</p>
+
+    <div class="row">
+      <input id="topic" placeholder="e.g. The history of coffee" value="The history of coffee" />
+      <button id="go">Summarize</button>
+    </div>
+
+    <div id="out" class="card">
+      <div class="label">Summary</div>
+      <div id="summary"></div>
+      <details>
+        <summary>Show raw research notes</summary>
+        <div id="research" style="margin-top:8px;color:#c3c7d1"></div>
+      </details>
+    </div>
+  </main>
+
+  <script>
+    const btn = document.getElementById('go');
+    const out = document.getElementById('out');
+    const summaryEl = document.getElementById('summary');
+    const researchEl = document.getElementById('research');
+
+    async function run() {
+      const topic = document.getElementById('topic').value.trim();
+      if (!topic) return;
+      btn.disabled = true; btn.textContent = 'Thinking…';
+      out.classList.add('show');
+      summaryEl.classList.remove('err');
+      summaryEl.textContent = 'Running researcher → writer…';
+      researchEl.textContent = '';
+      try {
+        const res = await fetch('/api/summarize', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ topic })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+        summaryEl.textContent = data.summary;
+        researchEl.textContent = data.research;
+      } catch (e) {
+        summaryEl.classList.add('err');
+        summaryEl.textContent = 'Error: ' + e.message;
+      } finally {
+        btn.disabled = false; btn.textContent = 'Summarize';
+      }
+    }
+
+    btn.addEventListener('click', run);
+    document.getElementById('topic').addEventListener('keydown', e => {
+      if (e.key === 'Enter') run();
+    });
+  </script>
+</body>
+</html>
