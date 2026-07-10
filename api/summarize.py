@@ -41,11 +41,15 @@ class handler(BaseHTTPRequestHandler):
             state = _graph.invoke({"topic": topic})
             self._send(200, {"research": state["research"], "summary": state["summary"]})
         except Exception as e:  # surface upstream/model errors to the caller
+            root = e
+            while root.__cause__ or root.__context__:
+                root = root.__cause__ or root.__context__
             self._send(500, {
                 "error": f"{type(e).__name__}: {e}",
+                "root_cause": f"{type(root).__name__}: {root}",
                 "model": os.environ.get("OPENROUTER_MODEL", "(default)"),
                 "has_key": bool(os.environ.get("OPENROUTER_API_KEY")),
-                "trace": traceback.format_exc()[-800:],
+                "trace": traceback.format_exc()[:1500],
             })
 
     def _send(self, code: int, payload: dict):
