@@ -23,15 +23,16 @@ from typing import TypedDict
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
-# Use the OS certificate store for TLS (fixes "unable to get local issuer
-# certificate" on machines behind a corporate/self-signed root CA). Must run
-# before any HTTPS client is created. Wrapped in try/except so it's a no-op on
-# hosts (e.g. Vercel's Linux runtime) where it isn't needed or available.
-try:
-    import truststore
-    truststore.inject_into_ssl()
-except Exception:
-    pass
+# On Windows, use the OS certificate store for TLS (fixes "unable to get local
+# issuer certificate" behind a corporate/self-signed root CA). We scope this to
+# Windows only: on Linux hosts like Vercel the OS trust store may be empty, so
+# injecting it would break every HTTPS call — there, Python's bundled CAs work.
+if sys.platform == "win32":
+    try:
+        import truststore
+        truststore.inject_into_ssl()
+    except Exception:
+        pass
 
 from dotenv import load_dotenv  # reads key/value pairs from a local .env file
 load_dotenv()  # loads .env into os.environ so OPENROUTER_API_KEY is available
