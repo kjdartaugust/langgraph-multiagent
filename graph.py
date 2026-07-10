@@ -43,7 +43,7 @@ from openai import OpenAI, RateLimitError  # OpenRouter speaks the OpenAI API.
 
 # --- LLM helper ------------------------------------------------------------
 # A free model on OpenRouter so this runs without paid credits (override via .env).
-MODEL = os.environ.get("OPENROUTER_MODEL", "openai/gpt-oss-20b:free")
+MODEL = os.environ.get("OPENROUTER_MODEL", "openai/gpt-oss-20b:free").strip()
 
 
 def get_client() -> OpenAI:
@@ -51,9 +51,12 @@ def get_client() -> OpenAI:
 
     OpenRouter is OpenAI-API-compatible: same client, different base_url + key.
     """
-    key = os.environ.get("OPENROUTER_API_KEY")
+    # .strip() guards against trailing newlines/spaces (common when a key is
+    # pasted into a hosting dashboard's env-var box) — those make an illegal
+    # HTTP Authorization header and cause a confusing "Connection error".
+    key = os.environ.get("OPENROUTER_API_KEY", "").strip()
     if not key:
-        raise SystemExit("Set OPENROUTER_API_KEY (get a free key at openrouter.ai/keys).")
+        raise RuntimeError("Set OPENROUTER_API_KEY (get a free key at openrouter.ai/keys).")
     return OpenAI(base_url="https://openrouter.ai/api/v1", api_key=key)
 
 

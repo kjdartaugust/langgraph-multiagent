@@ -14,7 +14,6 @@ from http.server import BaseHTTPRequestHandler
 import json
 import os
 import sys
-import traceback
 
 # Make the repo-root modules importable from inside the api/ folder.
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -41,16 +40,7 @@ class handler(BaseHTTPRequestHandler):
             state = _graph.invoke({"topic": topic})
             self._send(200, {"research": state["research"], "summary": state["summary"]})
         except Exception as e:  # surface upstream/model errors to the caller
-            root = e
-            while root.__cause__ or root.__context__:
-                root = root.__cause__ or root.__context__
-            self._send(500, {
-                "error": f"{type(e).__name__}: {e}",
-                "root_cause": f"{type(root).__name__}: {root}",
-                "model": os.environ.get("OPENROUTER_MODEL", "(default)"),
-                "has_key": bool(os.environ.get("OPENROUTER_API_KEY")),
-                "trace": traceback.format_exc()[:1500],
-            })
+            self._send(500, {"error": f"{type(e).__name__}: {e}"})
 
     def _send(self, code: int, payload: dict):
         body = json.dumps(payload).encode("utf-8")
