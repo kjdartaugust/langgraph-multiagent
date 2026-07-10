@@ -2,9 +2,12 @@
 Vercel serverless function: POST a topic, run the LangGraph researcher->writer
 flow, and return the research + summary as JSON.
 
-The two-agent flow itself lives in app.py at the repo root (reused as-is). We
+The two-agent flow itself lives in graph.py at the repo root (reused as-is). We
 add the repo root to sys.path so this function can import it, and vercel.json's
-includeFiles makes sure app.py is bundled alongside this function.
+includeFiles makes sure graph.py is bundled alongside this function.
+
+(The module is named graph.py, not app.py, because Vercel's Python preset treats
+a root app.py as a web-server entrypoint and expects a top-level `app` object.)
 """
 
 from http.server import BaseHTTPRequestHandler
@@ -15,10 +18,10 @@ import sys
 # Make the repo-root modules importable from inside the api/ folder.
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import app  # noqa: E402  -- our researcher/writer graph
+import graph  # noqa: E402  -- our researcher/writer graph
 
 # Build the graph once at cold start; Fluid Compute reuses it across requests.
-_graph = app.build_graph()
+_graph = graph.build_graph()
 
 
 class handler(BaseHTTPRequestHandler):

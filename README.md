@@ -24,13 +24,13 @@ cp .env.example .env        # Windows: copy .env.example .env
 # edit .env and set OPENROUTER_API_KEY=sk-or-v1-...
 ```
 
-`app.py` loads `.env` automatically (via python-dotenv), so you don't need to
+`graph.py` loads `.env` automatically (via python-dotenv), so you don't need to
 export anything.
 
 ## Run
 
 ```bash
-python app.py "The history of coffee"
+python graph.py "The history of coffee"
 ```
 
 ## The pattern to learn

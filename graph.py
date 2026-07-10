@@ -10,7 +10,7 @@ Flow:  researcher --> writer --> END
 Run:
     pip install -r requirements.txt
     cp .env.example .env        # then put your OpenRouter key in .env
-    python app.py "The history of coffee"
+    python graph.py "The history of coffee"
 """
 
 import os

@@ -7,11 +7,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 A minimal, teaching-oriented LangGraph multi-agent example. Two agents run in
 sequence: a **researcher** gathers notes on a topic, a **writer** turns those
 notes into a summary. The whole point is to demonstrate the LangGraph pattern
-clearly, so keep `app.py` simple and well-commented — readability beats features.
+clearly, so keep `graph.py` simple and well-commented — readability beats features.
 
 ## Architecture
 
-Single file: `app.py`.
+Single file: `graph.py`.
 
 - **State** (`TypedDict`) is the shared memory that flows through the graph:
   `topic` (input) → `research` (set by researcher) → `summary` (set by writer).
@@ -38,11 +38,11 @@ uv venv --python 3.11
 uv pip install --native-tls -r requirements.txt
 
 # Compile-check the graph without needing an API key:
-.venv/Scripts/python -c "import app; app.build_graph(); print('OK')"
+.venv/Scripts/python -c "import graph; graph.build_graph(); print('OK')"
 
 # Run the full flow (needs a key):
 export OPENROUTER_API_KEY="sk-or-..."   # PowerShell: $env:OPENROUTER_API_KEY="..."
-.venv/Scripts/python app.py "The history of coffee"
+.venv/Scripts/python graph.py "The history of coffee"
 ```
 
 There are no tests or lint config; if adding checks, wire them into this same venv.
